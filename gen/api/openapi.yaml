@@ -1,0 +1,324 @@
+openapi: 3.0.1
+info:
+  contact:
+    email: vizgalov@vtb.ru
+    name: Евгений Визгалов
+    url: http://wiki.corp.dev.vtb/pages/viewpage.action?pageId=247047286
+  description: Получение информации по официальным курсам валют ЦБ и курсам металлов.
+    Промышленный сервис находится по адресу https://, тестовый сервис - по адресу
+    https://ingress-ds1-genr01-fxrt-dev1.apps.ds1-genr01.corp.dev.vtb/fxrates-cbr/v1/api
+  title: Axioma OMNI currency rates REST API
+  version: 1.0.0
+servers:
+- url: https://k3-tyki-app401lv.vtb24.ru/api/CIB/FXRT/currency/v1
+tags:
+- description: Cbr Rates Controller
+  name: cbr-rates-controller
+- description: Metal Rates Controller
+  name: metal-rates-controller
+paths:
+  /cbr/daily_fxrates:
+    get:
+      deprecated: false
+      description: Получение информации по курсам валют ЦБ.
+      operationId: dailyFxrates
+      parameters:
+      - allowEmptyValue: false
+        description: Дата получения курса.
+        example: 2000-12-31
+        explode: true
+        in: query
+        name: date
+        required: false
+        schema:
+          format: date
+          maxLength: 10
+          minLength: 10
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatesOnDateResponse'
+          description: Успешное получение информации по курсам валют ЦБ.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalErrorResponse'
+          description: Неверный параметр запроса.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalErrorResponse'
+          description: Пользователь не авторизован.
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalErrorResponse'
+          description: Неверный адрес запроса.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalErrorResponse'
+          description: Внутренняя ошибка.
+      summary: Получение информации по курсам валют ЦБ
+      tags:
+      - cbr-rates-controller
+      x-accepts: application/json
+  /cbr/daily_fxrates/latest_date:
+    get:
+      deprecated: false
+      description: Получение последней даты курсов валют ЦБ.
+      operationId: dailyFxratesLatestDate
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LatestRatesDateResponse'
+          description: Успешное получение последней даты курсов валют ЦБ.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalErrorResponse'
+          description: Пользователь не авторизован.
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalErrorResponse'
+          description: Неверный адрес запроса.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalErrorResponse'
+          description: Внутренняя ошибка.
+      summary: Получение последней даты курсов валют ЦБ
+      tags:
+      - cbr-rates-controller
+      x-accepts: application/json
+  /cbr/metal_prices:
+    get:
+      deprecated: false
+      description: Получение информации по ценам драгоценных металлов.
+      operationId: metals
+      parameters:
+      - allowEmptyValue: false
+        description: Дата получения курса.
+        example: 2000-12-31
+        explode: true
+        in: query
+        name: date
+        required: false
+        schema:
+          exclusiveMaximum: false
+          exclusiveMinimum: false
+          format: date
+          maxLength: 10
+          minLength: 10
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetalsOnDateResponse'
+          description: Успешное получение информации по курсам металлов ЦБ.
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalErrorResponse'
+          description: Неверный параметр запроса.
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalErrorResponse'
+          description: Пользователь не авторизован.
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalErrorResponse'
+          description: Неверный адрес запроса.
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GlobalErrorResponse'
+          description: Внутренняя ошибка.
+      summary: Получение информации по ценам драгоценных металлов
+      tags:
+      - metal-rates-controller
+      x-accepts: application/json
+components:
+  schemas:
+    CurrencyResponse:
+      additionalProperties: false
+      description: Информация о валюте.
+      properties:
+        alphaCode:
+          description: ISO Букв. код валюты.
+          example: AMD
+          maxLength: 3
+          type: string
+        name:
+          description: Название валюты
+          example: Армянских драмов
+          maxLength: 255
+          type: string
+        numericCode:
+          description: ISO Цифр. код валюты
+          example: "051"
+          maxLength: 3
+          type: string
+      title: CurrencyResponse
+      type: object
+    GlobalErrorResponse:
+      additionalProperties: false
+      description: Сообщение об ошибке, возникшей в сервисе курсов валют.
+      properties:
+        status:
+          description: Код состояния HTTP.
+          format: int32
+          maximum: 999
+          minimum: 0
+          type: integer
+        message:
+          description: Сообщение об ошибке.
+          maxLength: 4096
+          type: string
+        timestamp:
+          description: Дата и время возникновения ошибки.
+          example: 2000-12-31T08:59:32.39475
+          maxLength: 32
+          pattern: ^\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+$
+          type: string
+      title: GlobalErrorResponse
+      type: object
+    LatestRatesDateResponse:
+      additionalProperties: false
+      description: Дата курсов валют ЦБ.
+      example:
+        date: 2020-12-31
+      properties:
+        date:
+          description: Дата курсов валют.
+          format: date
+          maxLength: 10
+          type: string
+      title: LatestRatesDateResponse
+      type: object
+    MetalResponse:
+      additionalProperties: false
+      description: Информация о цене металла на заданную дату.
+      properties:
+        alphaCode:
+          description: Код по классификатору клиринговых валют
+          maxLength: 3
+          type: string
+        name:
+          description: Наименование драгоценного металла
+          maxLength: 255
+          type: string
+        price:
+          description: Цена в рублях за 1 грамм.
+          maximum: 1.0E+14
+          minimum: 0
+          type: number
+      title: MetalResponse
+      type: object
+    MetalsOnDateResponse:
+      additionalProperties: false
+      description: Список официальных цен драгоценных металлов на заданную дату
+      example:
+        date: 2020-12-31
+        prices:
+        - alphaCode: A98
+          name: Золото
+          price: 4048.450594
+        - alphaCode: A99
+          name: Серебро
+          price: 55.026094
+      properties:
+        date:
+          description: Дата установления цены (может отличатся от запрашиваемой если
+            на запрашиваемою дату курс не устанавливался).
+          format: date
+          maxLength: 10
+          type: string
+        prices:
+          description: Список цен драгоценных металлов.
+          items:
+            $ref: '#/components/schemas/MetalResponse'
+          type: array
+      title: MetalsOnDateResponse
+      type: object
+    RateResponse:
+      additionalProperties: false
+      description: Информация о курсе валюты на заданную дату.
+      properties:
+        currency:
+          $ref: '#/components/schemas/CurrencyResponse'
+        price:
+          description: Значение курса.
+          example: 0.1
+          maximum: 1.0E+14
+          minimum: 0
+          type: number
+        scale:
+          description: Номинал.
+          example: 100000
+          exclusiveMaximum: false
+          exclusiveMinimum: false
+          format: int32
+          maximum: 1.0E+9
+          minimum: 0
+          type: integer
+      title: RateResponse
+      type: object
+    RatesOnDateResponse:
+      additionalProperties: false
+      description: Список официальных курсов валют на заданную дату, устанавливаемых
+        ежедневно.
+      example:
+        date: 2020-12-31
+        rates:
+        - currency:
+            name: Австралийский доллар
+            numericCode: "036"
+            alphaCode: AUD
+          price: 56.0502
+          scale: 1
+        - currency:
+            name: Фунт стерлингов Соединенного королевства
+            numericCode: "826"
+            alphaCode: GBP
+          price: 99.9265
+          scale: 1
+      properties:
+        date:
+          description: Дата установления курса (может отличатся от запрашиваемой если
+            на запрашиваемою дату курс не устанавливался).
+          example: 2000-12-31
+          format: date
+          maxLength: 10
+          type: string
+        rates:
+          description: Список курсов валют.
+          items:
+            $ref: '#/components/schemas/RateResponse'
+          type: array
+      title: RatesOnDateResponse
+      type: object
+
