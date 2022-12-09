@@ -49,8 +49,8 @@ namespace centros_ref_book
             services.Configure<ReceivingConfiguration>(Configuration.GetSection("ReceivingConfiguration"));
 
             services.RegisterImplementation();
-            //services.AddHostedService<CurrencyHostedService>();
-            //services.AddHostedService<MetallsHostedServices>();
+            services.AddHostedService<CurrencyHostedService>();
+            services.AddHostedService<MetallsHostedServices>();
 
             services.AddApiVersioning(options =>
             {
